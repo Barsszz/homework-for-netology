@@ -102,6 +102,7 @@ motd_var_modify: |
 ```
 
 `Переменная "motd_var" лежит в файле group_var -> servers -> vars.yml`
+
 `Сама переменная`
 
 ```yaml
@@ -125,6 +126,7 @@ motd_var: "Hello netology!"
 ```
 
 `Как и в предыдущем пункте переменная лежит по пути: group_var -> servers -> vars.yml`
+
 `Сама переменная`
 
 ```yaml
