@@ -28,7 +28,7 @@ motd_var_modify: |
 
 `Поле для вставки кода`
 #### Сам плейбук
-- name: create dir and download archive
+\- name: create dir and download archive
   hosts: servers
   become: yes
   tasks:
@@ -38,32 +38,32 @@ motd_var_modify: |
         state: directory
         mode: '755'
 
-    - name: create dir for unarchive
+    \- name: create dir for unarchive
       file:
         path: '/home/alma/for_unarchive'
         state: directory
         mode: '755'
     
-    - name: install tar
+    \- name: install tar
       dnf:
         name:
           - tar
         state: present
 
-    - name: download archive apache kafka
+    \- name: download archive apache kafka
       ansible.builtin.get_url:
         url: 'https://www.apache.org/dyn/closer.lua/kafka/4.2.1/kafka-4.2.1-src.tgz?action=download'
         dest: '/home/alma/for_download/kafka_2.13-4.3.0.tgz'
         mode: '644'
       register: archive_check
 
-    - name: unarchive archive
+    \- name: unarchive archive
       ansible.builtin.unarchive:
         src: '/home/alma/for_download/kafka_2.13-4.3.0.tgz'
         dest: '/home/alma/for_unarchive'
         remote_src: yes
 
-    - name: debug
+    \- name: debug
       debug:
         msg: "{{ 'Архив успешно скачан' if archive_check.changed else 'Архив не скачан/был скачан' }}"
 
@@ -72,13 +72,13 @@ motd_var_modify: |
 `Поле для вставки кода`
 #### Сам плейбук
 
-- name: install tuned
+\- name: install tuned
       dnf:
         name:
           - tuned
         state: present
     
-    - name: add tuned to startup
+    \- name: add tuned to startup
       ansible.builtin.service:
         name: tuned
         state: started
@@ -89,7 +89,7 @@ motd_var_modify: |
 `Поле для вставки кода`
 #### Сам плейбук
 
-- name: changed motd
+\- name: changed motd
       ansible.builtin.copy:
         content: '{{ motd_var }}'
         dest: '/etc/motd.d/00-start'
@@ -109,7 +109,7 @@ motd_var: "Hello netology!"
 `Поле для вставки кода`
 #### Сам плейбук
 
-  - name: modify motd
+  \- name: modify motd
       ansible.builtin.copy:
         content: '{{ motd_var_modify }}'
         dest: '/etc/motd.d/00-welcome'
@@ -146,52 +146,52 @@ apache_port: 80
 
 `Код для handlers`
 
-- name: restart apache service
+\- name: restart apache service
   ansible.builtin.service:
     name: '{{ service_name }}'
     state: restarted
 
 `Код для tasks`
 
-- name: install apache
+\- name: install apache
   ansible.builtin.dnf:
     name:
-      - httpd
+      \- httpd
     state: present
   
-- name: Open port
+\- name: Open port
   ansible.posix.firewalld:
     port: '{{ apache_port }}/tcp'
     permanent: yes
     immediate: yes
     state: enabled
 
-- name: add index.html file
+\- name: add index.html file
   ansible.builtin.template:
     src: index.html
     dest: '{{ web_path }}/{{ index_file }}'
     mode: '644'
 
-- name: autorun apache service 
+\- name: autorun apache service 
   ansible.builtin.service:
     name: '{{ service_name }}'
     state: started
     enabled: yes
 
-- name: service check
+\- name: service check
   ansible.builtin.uri:
     url: 'http://{{ ansible_default_ipv4.address }}:{{ apache_port }}'
     return_content: no
     status_code:
-      - 200
+      \- 200
   register: apache_check
 
-- name: debug correct
+\- name: debug correct
   ansible.builtin.debug:
     msg: 'Status code 200'
   when: apache_check.status == 200 
 
-- name: debug incorrect
+\- name: debug incorrect
   ansible.builtin.debug:
     msg: 'Server is unavailable'
   when: apache_check.status != 200
@@ -207,6 +207,8 @@ apache_port: 80
 
 `Код для шаблона index.html`
 
+```markdown
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
