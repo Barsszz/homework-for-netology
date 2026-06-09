@@ -6,11 +6,13 @@
 
 #### Код файла vars.yml
 
+```yaml
 motd_var: "Hello netology!"
 motd_var_modify: | 
   Hello dear {{ ansible_hostname }}
   Ipv4: {{ ansible_default_ipv4.address }}
   Good day !
+```
 
 Переменные я использовал для задания 1.3 и задания 2.
 
@@ -26,9 +28,10 @@ motd_var_modify: |
 4. Потом идет распаковка архива.
 5. В последнем блоке идет проверка на то, что архив скачался.
 
-`Поле для вставки кода`
 #### Сам плейбук
-\- name: create dir and download archive
+
+```yaml
+- name: create dir and download archive
   hosts: servers
   become: yes
   tasks:
@@ -38,67 +41,72 @@ motd_var_modify: |
         state: directory
         mode: '755'
 
-    \- name: create dir for unarchive
+    - name: create dir for unarchive
       file:
         path: '/home/alma/for_unarchive'
         state: directory
         mode: '755'
     
-    \- name: install tar
+    - name: install tar
       dnf:
         name:
           - tar
         state: present
 
-    \- name: download archive apache kafka
+    - name: download archive apache kafka
       ansible.builtin.get_url:
         url: 'https://www.apache.org/dyn/closer.lua/kafka/4.2.1/kafka-4.2.1-src.tgz?action=download'
         dest: '/home/alma/for_download/kafka_2.13-4.3.0.tgz'
         mode: '644'
       register: archive_check
 
-    \- name: unarchive archive
+    - name: unarchive archive
       ansible.builtin.unarchive:
         src: '/home/alma/for_download/kafka_2.13-4.3.0.tgz'
         dest: '/home/alma/for_unarchive'
         remote_src: yes
 
-    \- name: debug
+    - name: debug
       debug:
         msg: "{{ 'Архив успешно скачан' if archive_check.changed else 'Архив не скачан/был скачан' }}"
+```
 
 2. #### Установить пакет tuned из стандартного репозитория вашей ОС. Запустить его, как демон — конфигурационный файл systemd появится автоматически при установке. Добавить tuned в автозагрузку.
 
-`Поле для вставки кода`
 #### Сам плейбук
 
-\- name: install tuned
+```yaml
+- name: install tuned
       dnf:
         name:
           - tuned
         state: present
     
-    \- name: add tuned to startup
+    - name: add tuned to startup
       ansible.builtin.service:
         name: tuned
         state: started
         enabled: yes
+```
 
 3. #### Изменить приветствие системы (motd) при входе на любое другое. Пожалуйста, в этом задании используйте переменную для задания приветствия. Переменную можно задавать любым удобным способом.
 
-`Поле для вставки кода`
 #### Сам плейбук
 
-\- name: changed motd
+```yaml
+- name: changed motd
       ansible.builtin.copy:
         content: '{{ motd_var }}'
         dest: '/etc/motd.d/00-start'
         mode: '644'
+```
 
 `Переменная "motd_var" лежит в файле group_var -> servers -> vars.yml`
 `Сама переменная`
 
+```yaml
 motd_var: "Hello netology!"
+```
 
 ---
 
@@ -106,23 +114,25 @@ motd_var: "Hello netology!"
 
 #### Модифицируйте плейбук из пункта 3, задания 1. В качестве приветствия он должен установить IP-адрес и hostname управляемого хоста, пожелание хорошего дня системному администратору.
 
-`Поле для вставки кода`
 #### Сам плейбук
 
-  \- name: modify motd
+```yaml
+  - name: modify motd
       ansible.builtin.copy:
         content: '{{ motd_var_modify }}'
         dest: '/etc/motd.d/00-welcome'
         mode: '644'
+```
 
 `Как и в предыдущем пункте переменная лежит по пути: group_var -> servers -> vars.yml`
 `Сама переменная`
 
+```yaml
 motd_var_modify: | 
   Hello dear {{ ansible_hostname }}
   Ipv4: {{ ansible_default_ipv4.address }}
   Good day !
-
+```
 ---
 
 ### Задание 3
@@ -138,63 +148,69 @@ motd_var_modify: |
 
 `Переменные`
 
+```yaml
 package_name: httpd 
 service_name: httpd
 web_path: '/var/www/html'
 index_file: index.html
 apache_port: 80
+```
 
 `Код для handlers`
 
-\- name: restart apache service
+```yaml
+- name: restart apache service
   ansible.builtin.service:
     name: '{{ service_name }}'
     state: restarted
+```
 
 `Код для tasks`
 
-\- name: install apache
+```yaml
+- name: install apache
   ansible.builtin.dnf:
     name:
-      \- httpd
+      - httpd
     state: present
   
-\- name: Open port
+- name: Open port
   ansible.posix.firewalld:
     port: '{{ apache_port }}/tcp'
     permanent: yes
     immediate: yes
     state: enabled
 
-\- name: add index.html file
+- name: add index.html file
   ansible.builtin.template:
     src: index.html
     dest: '{{ web_path }}/{{ index_file }}'
     mode: '644'
 
-\- name: autorun apache service 
+- name: autorun apache service 
   ansible.builtin.service:
     name: '{{ service_name }}'
     state: started
     enabled: yes
 
-\- name: service check
+- name: service check
   ansible.builtin.uri:
     url: 'http://{{ ansible_default_ipv4.address }}:{{ apache_port }}'
     return_content: no
     status_code:
-      \- 200
+      - 200
   register: apache_check
 
-\- name: debug correct
+- name: debug correct
   ansible.builtin.debug:
     msg: 'Status code 200'
   when: apache_check.status == 200 
 
-\- name: debug incorrect
+- name: debug incorrect
   ansible.builtin.debug:
     msg: 'Server is unavailable'
   when: apache_check.status != 200
+```
 
 `Объяснение кода`
 
@@ -207,7 +223,6 @@ apache_port: 80
 
 `Код для шаблона index.html`
 
-```markdown
 ```html
 <!DOCTYPE html>
 <html lang="ru">
@@ -219,6 +234,9 @@ apache_port: 80
     <h1>Hello netology !</h1>
 </body>
 </html>
+```
+
+---
 
 `Скриншоты`
 Сейчас httpd нет на ВМ
