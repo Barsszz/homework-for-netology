@@ -1,0 +1,68 @@
+---
+- name: create dir and download archive
+  hosts: servers
+  become: yes
+  tasks:
+    - name: create dir for download
+      file:
+        path: /home/alma/for_download
+        state: directory
+        mode: '755'
+
+    - name: create dir for unarchive
+      file:
+        path: '/home/alma/for_unarchive'
+        state: directory
+        mode: '755'
+    
+    - name: install tar
+      dnf:
+        name:
+          - tar
+        state: present
+
+    - name: download archive apache kafka
+      ansible.builtin.get_url:
+        url: 'https://www.apache.org/dyn/closer.lua/kafka/4.2.1/kafka-4.2.1-src.tgz?action=download'
+        dest: '/home/alma/for_download/kafka_2.13-4.3.0.tgz'
+        mode: '644'
+      register: archive_check
+
+    - name: unarchive archive
+      ansible.builtin.unarchive:
+        src: '/home/alma/for_download/kafka_2.13-4.3.0.tgz'
+        dest: '/home/alma/for_unarchive'
+        remote_src: yes
+
+    - name: debug
+      debug:
+        msg: "{{ 'Архив успешно скачан' if archive_check.changed else 'Архив не скачан/был скачан' }}"
+
+    - name: install tuned
+      dnf:
+        name:
+          - tuned
+        state: present
+    
+    - name: add tuned to startup
+      ansible.builtin.service:
+        name: tuned
+        state: started
+        enabled: yes
+
+    - name: changed motd
+      ansible.builtin.copy:
+        content: '{{ motd_var }}'
+        dest: '/etc/motd.d/00-start'
+        mode: '644'
+
+    - name: modify motd
+      ansible.builtin.copy:
+        content: '{{ motd_var_modify }}'
+        dest: '/etc/motd.d/00-welcome'
+        mode: '644'
+
+
+
+        
+        

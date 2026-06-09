@@ -1,0 +1,6 @@
+---
+package_name: httpd
+service_name: httpd
+web_path: '/var/www/html'
+index_file: index.html
+apache_port: 80

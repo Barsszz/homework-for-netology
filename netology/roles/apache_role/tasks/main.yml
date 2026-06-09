@@ -1,0 +1,42 @@
+- name: install apache
+  ansible.builtin.dnf:
+    name:
+      - httpd
+    state: present
+  
+- name: Open port
+  ansible.posix.firewalld:
+    port: '{{ apache_port }}/tcp'
+    permanent: yes
+    immediate: yes
+    state: enabled
+
+- name: add index.html file
+  ansible.builtin.template:
+    src: index.html
+    dest: '{{ web_path }}/{{ index_file }}'
+    mode: '644'
+
+- name: autorun apache service 
+  ansible.builtin.service:
+    name: '{{ service_name }}'
+    state: started
+    enabled: yes
+
+- name: service check
+  ansible.builtin.uri:
+    url: 'http://{{ ansible_default_ipv4.address }}:{{ apache_port }}'
+    return_content: no
+    status_code:
+      - 200
+  register: apache_check
+
+- name: debug correct
+  ansible.builtin.debug:
+    msg: 'Status code 200'
+  when: apache_check.status == 200 
+
+- name: debug incorrect
+  ansible.builtin.debug:
+    msg: 'Server is unavailable'
+  when: apache_check.status != 200

@@ -1,0 +1,2 @@
+[servers]
+vm1 ansible_host=192.168.122.134 ansible_user=alma

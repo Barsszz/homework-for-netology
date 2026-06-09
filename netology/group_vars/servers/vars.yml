@@ -1,0 +1,7 @@
+---
+
+motd_var: "Hello netology!"
+motd_var_modify: | 
+  Hello dear {{ ansible_hostname }}
+  Ipv4: {{ ansible_default_ipv4.address }}
+  Good day !

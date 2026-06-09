@@ -1,0 +1,6 @@
+---
+- name: Start apache Server
+  hosts: servers
+  become: yes
+  roles:
+   - role: './roles/apache_role'
